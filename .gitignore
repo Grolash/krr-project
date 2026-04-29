@@ -11,3 +11,5 @@
 
 /*.xml
 /*.iml
+# Ignore all .idea
+/.idea/*
