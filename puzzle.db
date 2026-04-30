@@ -3,4 +3,4 @@ total_blocks(N).
 
 piece_size(0, 1). % piece 0 is made of 1 cell
 pick_times(0, 10). % for piece 0, pick it 10 times
-piece(0, 0, 0, 0). % (X, Y, Z), Id of piece
+piece(0, 0, 0, 0). % Id of piece, (X, Y, Z)

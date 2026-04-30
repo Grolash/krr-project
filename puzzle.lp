@@ -1,24 +1,60 @@
+% cup
 hollow(X, Y, Z):- length(L), X = 2..L-2, height(H), Y = 2..H, depth(D), Z = 2..D-2.
 cell(X, Y, Z):- length(L), X=0..L, height(H), Y=0..H, depth(D), Z=0..D, not hollow(X, Y, Z).
 
-mirror(0, X, Y, Z, P):- piece(X, Y, Z, P).
-% x-axis mirror redundant, can be obtained from mirror about y-axis and rotation about z-axis
-mirror(1, NewX, Y, Z, P):- piece(X, Y, Z, P), NewX = -X. % y-axis
-% z-axis mirror redundant, can be obtained from mirror about y-axis and rotation about x-axis
+% symmetries of 3D pieces:
+% https://en.wikipedia.org/wiki/Octahedral_symmetry
+% "A regular octahedron has 24 rotational (or orientation-preserving) symmetries [...].
+% These include transformations that combine a reflection and a rotation."
+% "Take the set of all 3×3 permutation matrices and assign a + or − sign to each of the three 1s.
+% There are 3! = 6 permutations and 2^3 = 8 sign combinations for a total of 48 matrices,
+% giving the full octahedral group.
+% 24 of these matrices have a determinant of +1; these are the rotation matrices of the chiral octahedral group.
+% The other 24 matrices have a determinant of −1 and correspond to a reflection or inversion."
 
-rotate(0, M, X, Y, Z, P):- mirror(M, X, Y, Z, P).
-rotate(A, M, X, NewY, NewZ, P):- rotate(A-1, M, X, Y, Z, P), NewY = -Z, NewZ = Y, A = 1..3. % x-axis
-% y-axis rotation redundant, can be obtained from rotate about x-axis and z-axis
-rotate(4, M, NewX, NewY, Z, P):- rotate(0, M, X, Y, Z, P), NewX = -Y, NewY = X. % z-axis with A = 0 from rotate 0
-rotate(4 + A, M, NewX, NewY, Z, P):- rotate(A-1, M, X, Y, Z, P), NewX = -Y, NewY = X, A = 1..2. % z-axis inductively
+% Signed permutation matrices (6 permutations labelled by their sign: +1 = even nb of permutations, -1 = odd nb of perms)
+% https://en.wikipedia.org/wiki/Parity_of_a_permutation
+perm(1, 2, 3, 1). perm(2, 3, 1, 1). perm(3, 1, 2, 1).
+perm(1, 3, 2,-1). perm(2, 1, 3,-1). perm(3, 2, 1, -1).
+sign(1 ; -1).
 
-{ block(Bid, Pid, R, X, Y, Z) : cell(X, Y, Z), rotate(R, M, 0, 0, 0, Pid) }:- Bid = 0..N, total_blocks(N).
-correct_picks(Pid):- #sum{Bid : block(Bid, Pid, R, X, Y, Z)} = S, pick_times(Pid, S).
-:- not correct_picks(Pid).
+% rotations (the signed permutations with determinant = 1)
+rot(P1, S1, P2, S2, P3, S3):- perm(P1, P2, P3, SP), sign(S1), sign(S2), sign(S3), SP * S1 * S2 * S3 = 1.
+
+% we select coordinates to apply the thingy more easily
+coord(1,X,Y,Z,X). coord(2,X,Y,Z,Y). coord(3,X,Y,Z,Z).
+
+rotate(R, NewX, NewY, NewZ, Id):- piece(Id, X, Y, Z), rot(P1, S1, P2, S2, P3, S3), R = P1 * 100 + P2 * 100 + P3,
+                                    coord(P1, X, Y, Z, V1), NX = S1 * V1,
+                                    coord(P2, X, Y, Z, V2), NY = S2 * V2,
+                                    coord(P3, X, Y, Z, V3), NZ = S3 * V3.
+
+not_identical_rotations(P, R1, R2):- rotate(R1, X, Y, Z, P), rotate(R2, A, B, C, P), not rotate(R2, X, Y, Z, P).
+not_identical_rotations(P, R1, R2):- rotate(R2, X, Y, Z, P), rotate(R1, A, B, C, P), not rotate(R1, X, Y, Z, P).
+
+{ anchor(Bid, Pid, R, X, Y, Z) : cell(X, Y, Z), rotate(R, 0, 0, 0, Pid) }:- Bid = 0..N, total_blocks(N).
+correct_picks(Pid, S):- #count{ Bid : anchor(Bid, Pid, R, X, Y, Z) } = S.
+:- piece_size(Pid, S), not correct_picks(Pid, S). % we check the number of picks of a piece is correct
+:- anchor(Bid, Pid, R1, X, Y, Z), rotate(R2, A, B, C, Pid), not_identical_rotations(Pid, R1, R2), R1 < R2. % lex leader
+
+% for each anchor cell, we place all the coordinates of the shape on the board, relative to the anchor cell.
+placed(X, Y, Z, Bid):- anchor(Bid, Pid, R, A1, B1, C1), rotate(R, A2, B2, C2, Pid), X = A1 + A2, Y = B1 + B2, Z = C1 + C2.
+% X, Y, Z are equal to the anchor's coordinates plus the coordinates of the shape's cell in
+% its local coordinate system, for a rotation and mirroring given by the anchor.
+
+:- placed(X, Y, Z, Bid), not cell(X, Y, Z). % cannot place outside valid coordinates
+:- placed(X, Y, Z, Bid), placed(X, Y, Z, OtherBid), Bid != OtherBid. % cannot place two blocks in the same cell
 
 ortho_adjacent(X1, Y1, Z1, X2, Y2, Z2):- cell(X1, Y1, Z1), cell(X2, Y2, Z2), X1 = X2, Y1 = Y2, Z1 = Z2 + 1.
 ortho_adjacent(X1, Y1, Z1, X2, Y2, Z2):- cell(X1, Y1, Z1), cell(X2, Y2, Z2), X1 = X2, Y1 = Y2 + 1, Z1 = Z2.
 ortho_adjacent(X1, Y1, Z1, X2, Y2, Z2):- cell(X1, Y1, Z1), cell(X2, Y2, Z2), X1 = X2 + 1, Y1 = Y2, Z1 = Z2.
+
+equal_size(Bid1, Bid2):- anchor(Bid1, Pid1, R1, X1, Y1, Z1), anchor(Bid2, Pid2, R2, X2, Y2, Z2), piece_size(Pid1, S), piece_size(Pid2, S).
+
+% two blocks of equal size cannot be orthogonally adjacent
+:- placed(X1, Y1, Z1, Bid1), placed(X2, Y2, Z2, Bid2), ortho_adjacent(X1, Y1, Z1, X2, Y2, Z2), equal_size(Bid1, Bid2).
+
+:- cell(X, Y, Z), not placed(X, Y, Z, Bid).
 
 
 #show piece/2.
