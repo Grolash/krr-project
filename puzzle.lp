@@ -12,19 +12,18 @@ cell(X, Y, Z):- length(L), X=0..L, height(H), Y=0..H, depth(D), Z=0..D, not holl
 % 24 of these matrices have a determinant of +1; these are the rotation matrices of the chiral octahedral group.
 % The other 24 matrices have a determinant of −1 and correspond to a reflection or inversion."
 
-% Signed permutation matrices (6 permutations labelled by their sign: +1 = even nb of permutations, -1 = odd nb of perms)
-% https://en.wikipedia.org/wiki/Parity_of_a_permutation
-perm(1, 2, 3, 1). perm(2, 3, 1, 1). perm(3, 1, 2, 1).
-perm(1, 3, 2,-1). perm(2, 1, 3,-1). perm(3, 2, 1, -1).
+% Signed permutation matrices (6 permutations 2^3 = 8 sign combinations)
+perm(1, 2, 3). perm(2, 3, 1). perm(3, 1, 2).
+perm(1, 3, 2). perm(2, 1, 3). perm(3, 2, 1).
 sign(1 ; -1).
 
 % rotations (the signed permutations with determinant = 1)
-rot(P1, S1, P2, S2, P3, S3):- perm(P1, P2, P3, SP), sign(S1), sign(S2), sign(S3), SP * S1 * S2 * S3 = 1.
+rot(P1, S1, P2, S2, P3, S3):- perm(P1, P2, P3), sign(S1), sign(S2), sign(S3).
 
 % we select coordinates to apply the thingy more easily
 coord(1,X,Y,Z,X). coord(2,X,Y,Z,Y). coord(3,X,Y,Z,Z).
 
-rotate(R, NewX, NewY, NewZ, Id):- piece(Id, X, Y, Z), rot(P1, S1, P2, S2, P3, S3), R = P1 * 100 + P2 * 100 + P3,
+rotate(R, NewX, NewY, NewZ, Id):- piece(Id, X, Y, Z), rot(P1, S1, P2, S2, P3, S3), R = P1 * 100 + P2 * 10 + P3,
                                     coord(P1, X, Y, Z, V1), NX = S1 * V1,
                                     coord(P2, X, Y, Z, V2), NY = S2 * V2,
                                     coord(P3, X, Y, Z, V3), NZ = S3 * V3.
