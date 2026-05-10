@@ -23,7 +23,13 @@ rot(P1, S1, P2, S2, P3, S3):- perm(P1, P2, P3), sign(S1), sign(S2), sign(S3), S1
 % we select coordinates to apply the thingy more easily
 coord(1, X, Y, Z, X). coord(2, X, Y, Z, Y). coord(3, X, Y, Z, Z).
 
-rotate(R, NewX, NewY, NewZ, Id):- piece(Id, X, Y, Z), rot(P1, S1, P2, S2, P3, S3), R = P1 * 100 + P2 * 10 + P3,
+% Let's not use entire 6-tuples as Ids... Rotation Id = mixed radix encoding
+% P values in {1, 2, 3}
+% S values in {0, 1}
+% 2×3×2×3×2 = 72
+rotate(R, NewX, NewY, NewZ, Id):- piece(Id, X, Y, Z), rot(P1, S1, P2, S2, P3, S3),
+                                    R = (P1 - 1) * 72 + (S1 + 1) / 2 * 36 + (P2 - 1) * 12
+                                    + (S2 + 1) / 2 * 6 + (P3 - 1) * 2  + (S3 + 1) / 2,
                                     coord(P1, X, Y, Z, V1), NX = S1 * V1,
                                     coord(P2, X, Y, Z, V2), NY = S2 * V2,
                                     coord(P3, X, Y, Z, V3), NZ = S3 * V3.
