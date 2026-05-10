@@ -3,14 +3,7 @@ hollow(X, Y, Z):- length(L), X = 2..L-2, height(H), Y = 2..H, depth(D), Z = 2..D
 cell(X, Y, Z):- length(L), X=0..L, height(H), Y=0..H, depth(D), Z=0..D, not hollow(X, Y, Z).
 
 % symmetries of 3D pieces:
-% https://en.wikipedia.org/wiki/Octahedral_symmetry
-% "A regular octahedron has 24 rotational (or orientation-preserving) symmetries [...].
-% These include transformations that combine a reflection and a rotation."
-% "Take the set of all 3×3 permutation matrices and assign a + or − sign to each of the three 1s.
-% There are 3! = 6 permutations and 2^3 = 8 sign combinations for a total of 48 matrices,
-% giving the full octahedral group.
-% 24 of these matrices have a determinant of +1; these are the rotation matrices of the chiral octahedral group.
-% The other 24 matrices have a determinant of −1 and correspond to a reflection or inversion."
+% see puzzle.lp for the explanations
 
 % signed permutation matrices (6 permutations 2^3 = 8 sign combinations)
 perm(1, 2, 3,  1).  perm(2, 3, 1, 1).  perm(3, 1, 2,  1).  % even permutations (1 perm)
@@ -39,9 +32,8 @@ rotate(R, NewX, NewY, NewZ, Id):- piece(Id, X, Y, Z), rot(P1, S1, P2, S2, P3, S3
 not_identical_rotations(P, R1, R2):- rotate(R1, X, Y, Z, P), rotate(R2, A, B, C, P), not rotate(R2, X, Y, Z, P).
 not_identical_rotations(P, R1, R2):- rotate(R2, X, Y, Z, P), rotate(R1, A, B, C, P), not rotate(R1, X, Y, Z, P).
 
-1 { anchor(Bid, Pid, R, X, Y, Z) : cell(X, Y, Z), rotate(R, 0, 0, 0, Pid) } 1:- Bid = 0..N, total_blocks(N).
-correct_picks(Pid, Times):- #count{ Bid : anchor(Bid, Pid, R, X, Y, Z) } = Times.
-:- pick_times(Pid, Times), not correct_picks(Pid, Times). % we check the number of picks of a piece is correct
+{ anchor(Bid, Pid, R, X, Y, Z) : cell(X, Y, Z), rotate(R, 0, 0, 0, Pid) }.
+pick_times(Pid, Times):- #count{ Bid : anchor(Bid, Pid, R, X, Y, Z) } = Times.
 :- anchor(Bid, Pid, R1, X, Y, Z), rotate(R2, A, B, C, Pid), not not_identical_rotations(Pid, R1, R2), R1 < R2. % lex leader
 
 % for each anchor cell, we place all the coordinates of the shape on the board, relative to the anchor cell.
@@ -50,7 +42,7 @@ placed(X, Y, Z, Bid):- anchor(Bid, Pid, R, A1, B1, C1), rotate(R, A2, B2, C2, Pi
 % its local coordinate system, for a rotation and mirroring given by the anchor.
 
 :- placed(X, Y, Z, Bid), not cell(X, Y, Z). % cannot place outside valid coordinates
-:- cell(X, Y, Z), not placed(X, Y, Z, Bid). % equivalence ^v :) this is just in case it makes computation faster
+:- cell(X, Y, Z), not placed(X, Y, Z, Bid). % equivalence ^v; here it is important as we do not know the correct number of picks
 
 :- placed(X, Y, Z, Bid1), placed(X, Y, Z, Bid2), Bid1 != Bid2. % cannot place two blocks in the same cell
 
@@ -89,4 +81,10 @@ seq_agrees(Sym, I) :- seq_agrees(Sym, I - 1), % sequence building
    sym_block(Sym, X, Y, Z, Bid2),
    Bid1 > Bid2.
 
+total_blocks(N):- #count{ Bid : anchor(Bid, Pid, R, X, Y, Z)} = N.
+
+:- total_blocks(N), #sum{ Times : picks(Pid, Times) } != N. % sanity check
+
 #show placed/4.
+#show pick_times/2.
+#show total_blocks/1.
