@@ -13,15 +13,15 @@ cell(X, Y, Z):- length(L), X=0..L, height(H), Y=0..H, depth(D), Z=0..D, not holl
 % The other 24 matrices have a determinant of −1 and correspond to a reflection or inversion."
 
 % Signed permutation matrices (6 permutations 2^3 = 8 sign combinations)
-perm(1, 2, 3). perm(2, 3, 1). perm(3, 1, 2).
-perm(1, 3, 2). perm(2, 1, 3). perm(3, 2, 1).
+perm(1, 2, 3,  1).  perm(2, 3, 1, 1).  perm(3, 1, 2,  1).  % even permutations (1 perm)
+perm(1, 3, 2, -1).  perm(2, 1, 3, -1).  perm(3, 2, 1, -1).  % odd permutations (2 perms)
 sign(1 ; -1).
 
-% rotations (the signed permutations with determinant = 1)
-rot(P1, S1, P2, S2, P3, S3):- perm(P1, P2, P3), sign(S1), sign(S2), sign(S3).
+% rotations (signed permutations with determinant = 1; signs must compensate permutation parity)
+rot(P1, S1, P2, S2, P3, S3):- perm(P1, P2, P3), sign(S1), sign(S2), sign(S3), S1 * S2 * S3 * SP = 1.
 
 % we select coordinates to apply the thingy more easily
-coord(1,X,Y,Z,X). coord(2,X,Y,Z,Y). coord(3,X,Y,Z,Z).
+coord(1, X, Y, Z, X). coord(2, X, Y, Z, Y). coord(3, X, Y, Z, Z).
 
 rotate(R, NewX, NewY, NewZ, Id):- piece(Id, X, Y, Z), rot(P1, S1, P2, S2, P3, S3), R = P1 * 100 + P2 * 10 + P3,
                                     coord(P1, X, Y, Z, V1), NX = S1 * V1,
@@ -32,8 +32,8 @@ not_identical_rotations(P, R1, R2):- rotate(R1, X, Y, Z, P), rotate(R2, A, B, C,
 not_identical_rotations(P, R1, R2):- rotate(R2, X, Y, Z, P), rotate(R1, A, B, C, P), not rotate(R1, X, Y, Z, P).
 
 { anchor(Bid, Pid, R, X, Y, Z) : cell(X, Y, Z), rotate(R, 0, 0, 0, Pid) }:- Bid = 0..N, total_blocks(N).
-correct_picks(Pid, S):- #count{ Bid : anchor(Bid, Pid, R, X, Y, Z) } = S.
-:- piece_size(Pid, S), not correct_picks(Pid, S). % we check the number of picks of a piece is correct
+correct_picks(Pid, Times):- #count{ Bid : anchor(Bid, Pid, R, X, Y, Z) } = Times.
+:- pick_times(Pid, Times), not correct_picks(Pid, Times). % we check the number of picks of a piece is correct
 :- anchor(Bid, Pid, R1, X, Y, Z), rotate(R2, A, B, C, Pid), not_identical_rotations(Pid, R1, R2), R1 < R2. % lex leader
 
 % for each anchor cell, we place all the coordinates of the shape on the board, relative to the anchor cell.
@@ -42,7 +42,9 @@ placed(X, Y, Z, Bid):- anchor(Bid, Pid, R, A1, B1, C1), rotate(R, A2, B2, C2, Pi
 % its local coordinate system, for a rotation and mirroring given by the anchor.
 
 :- placed(X, Y, Z, Bid), not cell(X, Y, Z). % cannot place outside valid coordinates
-:- placed(X, Y, Z, Bid), placed(X, Y, Z, OtherBid), Bid != OtherBid. % cannot place two blocks in the same cell
+:- cell(X, Y, Z), not placed(X, Y, Z, Bid). % equivalence ^v :)
+
+:- placed(X, Y, Z, Bid1), placed(X, Y, Z, Bid2), Bid1 != Bid2. % cannot place two blocks in the same cell
 
 ortho_adjacent(X1, Y1, Z1, X2, Y2, Z2):- cell(X1, Y1, Z1), cell(X2, Y2, Z2), X1 = X2, Y1 = Y2, Z1 = Z2 + 1.
 ortho_adjacent(X1, Y1, Z1, X2, Y2, Z2):- cell(X1, Y1, Z1), cell(X2, Y2, Z2), X1 = X2, Y1 = Y2 + 1, Z1 = Z2.
@@ -51,9 +53,7 @@ ortho_adjacent(X1, Y1, Z1, X2, Y2, Z2):- cell(X1, Y1, Z1), cell(X2, Y2, Z2), X1 
 equal_size(Bid1, Bid2):- anchor(Bid1, Pid1, R1, X1, Y1, Z1), anchor(Bid2, Pid2, R2, X2, Y2, Z2), piece_size(Pid1, S), piece_size(Pid2, S).
 
 % two blocks of equal size cannot be orthogonally adjacent
-:- placed(X1, Y1, Z1, Bid1), placed(X2, Y2, Z2, Bid2), ortho_adjacent(X1, Y1, Z1, X2, Y2, Z2), equal_size(Bid1, Bid2).
-
-:- cell(X, Y, Z), not placed(X, Y, Z, Bid).
+:- placed(X1, Y1, Z1, Bid1), placed(X2, Y2, Z2, Bid2), ortho_adjacent(X1, Y1, Z1, X2, Y2, Z2), equal_size(Bid1, Bid2), Bid1 != Bid2.
 
 
 #show piece/2.
