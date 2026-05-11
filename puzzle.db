@@ -1,6 +1,7 @@
 % 6x6x4 = 144 total_blocks - 8 blocks centraux = 136 blocks
 length(6). height(6). depth(4).
-total_blocks(136).
+%10 + 4 + 1 + 2 + 0 + 2 + 3 + 4 + 1 + 2 + 1 + 1
+total_blocks(31).
 
 %piece(Id, X, Y, Z). the position of the block 
 %piece_size(Id, Size). The size of a piece
@@ -38,13 +39,13 @@ piece_score(4, 4).
 pick_times(4, 0).
 
 %IL5
-piece(5, 0, 0, 0). piece(5, 1, 0, 0). piece(5, 2, 0, 0). piece(5, 0, 0, 1). piece(1, 1, 0). 
+piece(5, 0, 0, 0). piece(5, 1, 0, 0). piece(5, 2, 0, 0). piece(5, 0, 0, 1). piece(5, 1, 1, 0). 
 piece_size(5, 5).
 piece_score(5, 5).
 pick_times(5, 2).
 
 %II5
-piece(6, 0, 0, 0). piece(6, 1, 0, 0). piece(6, 2, 0, 0). piece(1, 1, 0). piece(1, 1, 1).
+piece(6, 0, 0, 0). piece(6, 1, 0, 0). piece(6, 2, 0, 0). piece(6, 1, 1, 0). piece(6, 1, 1, 1).
 piece_size(6, 5).
 piece_score(6, 5).
 pick_times(6, 3).
@@ -74,7 +75,7 @@ piece_score(10, 7).
 pick_times(10, 1).
 
 %OL7
-piece(11, 0, 0, 0). piece(10, 1, 0, 0). piece(10, 0, 1, 0). piece(10, 1, 1, 0). piece(10, 0, 0, 1). piece(10, 1, 0, 1). piece(10, 0, 1, 1).
+piece(11, 0, 0, 0). piece(11, 1, 0, 0). piece(11, 0, 1, 0). piece(11, 1, 1, 0). piece(11, 0, 0, 1). piece(11, 1, 0, 1). piece(11, 0, 1, 1).
 piece_size(11, 7).
 piece_score(11, 7).
 pick_times(11, 1).
