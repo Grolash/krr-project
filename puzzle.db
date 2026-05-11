@@ -1,7 +1,7 @@
 length(10). height(10). depth(10).
-total_blocks(N).
+total_blocks(10).
 
-piece_score(O, 1). % piece O is worth 1 point
+piece_score(0, 1). % piece O is worth 1 point
 piece_size(0, 1). % piece 0 is made of 1 cell
 pick_times(0, 10). % for piece 0, pick it 10 times
 piece(0, 0, 0, 0). % Id of piece, (X, Y, Z)

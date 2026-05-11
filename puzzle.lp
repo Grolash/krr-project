@@ -18,11 +18,11 @@ perm(1, 3, 2, -1).  perm(2, 1, 3, -1).  perm(3, 2, 1, -1).  % odd permutations (
 sign(1 ; -1).
 
 % rotations (signed permutations with determinant = 1; signs must compensate permutation parity)
-rot(P1, S1, P2, S2, P3, S3):- perm(P1, P2, P3), sign(S1), sign(S2), sign(S3), S1 * S2 * S3 * SP = 1.
+rot(P1, S1, P2, S2, P3, S3):- perm(P1, P2, P3, SP), sign(S1), sign(S2), sign(S3), S1 * S2 * S3 * SP = 1.
 
 % we translate the non-zero value position number thingy into its corresponding coordinate
 % e.g. perm(3, 1, 2, 1) -> NewX = Z, NewY = X, NewZ = Y
-coord(1, X, Y, Z, X). coord(2, X, Y, Z, Y). coord(3, X, Y, Z, Z).
+coord(1, X, Y, Z, X):- cell(X, Y, Z). coord(2, X, Y, Z, Y):- cell(X, Y, Z). coord(3, X, Y, Z, Z):- cell(X, Y, Z).
 
 % let's not use entire 6-tuples as Ids... Rotation Id = mixed radix encoding
 % P values in {1, 2, 3}
@@ -31,16 +31,16 @@ coord(1, X, Y, Z, X). coord(2, X, Y, Z, Y). coord(3, X, Y, Z, Z).
 rotate(R, NewX, NewY, NewZ, Id):- piece(Id, X, Y, Z), rot(P1, S1, P2, S2, P3, S3),
                                     R = (P1 - 1) * 72 + (S1 + 1) / 2 * 36 + (P2 - 1) * 12
                                     + (S2 + 1) / 2 * 6 + (P3 - 1) * 2  + (S3 + 1) / 2,
-                                    coord(P1, X, Y, Z, V1), NX = S1 * V1,
-                                    coord(P2, X, Y, Z, V2), NY = S2 * V2,
-                                    coord(P3, X, Y, Z, V3), NZ = S3 * V3.
+                                    coord(P1, X, Y, Z, V1), NewX = S1 * V1,
+                                    coord(P2, X, Y, Z, V2), NewY = S2 * V2,
+                                    coord(P3, X, Y, Z, V3), NewZ = S3 * V3.
 
 % we detect equivalent rotations by checking if they share all coordinates or not
 not_identical_rotations(P, R1, R2):- rotate(R1, X, Y, Z, P), rotate(R2, A, B, C, P), not rotate(R2, X, Y, Z, P).
 not_identical_rotations(P, R1, R2):- rotate(R2, X, Y, Z, P), rotate(R1, A, B, C, P), not rotate(R1, X, Y, Z, P).
 
 1 { anchor(Bid, Pid, R, X, Y, Z) : cell(X, Y, Z), rotate(R, 0, 0, 0, Pid) } 1:- Bid = 0..N, total_blocks(N).
-correct_picks(Pid, Times):- #count{ Bid : anchor(Bid, Pid, R, X, Y, Z) } = Times.
+correct_picks(Pid, Times):- #count{ Bid : anchor(Bid, Pid, R, X, Y, Z) } = Times, pick_times(Pid, Times).
 :- pick_times(Pid, Times), not correct_picks(Pid, Times). % we check the number of picks of a piece is correct
 :- anchor(Bid, Pid, R1, X, Y, Z), rotate(R2, A, B, C, Pid), not not_identical_rotations(Pid, R1, R2), R1 < R2. % lex leader
 
@@ -50,7 +50,8 @@ placed(X, Y, Z, Bid):- anchor(Bid, Pid, R, A1, B1, C1), rotate(R, A2, B2, C2, Pi
 % its local coordinate system, for a rotation and mirroring given by the anchor.
 
 :- placed(X, Y, Z, Bid), not cell(X, Y, Z). % cannot place outside valid coordinates
-:- cell(X, Y, Z), not placed(X, Y, Z, Bid). % equivalence ^v :) this is just in case it makes computation faster
+covered(X, Y, Z):- placed(X, Y, Z, Bid). % a cell is covered if a piece is placed on it
+:- cell(X, Y, Z), not covered(X, Y, Z). % equivalence ^v :) this is just in case it makes computation faster
 
 :- placed(X, Y, Z, Bid1), placed(X, Y, Z, Bid2), Bid1 != Bid2. % cannot place two blocks in the same cell
 
