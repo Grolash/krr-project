@@ -1,6 +1,5 @@
-% cup
-hollow(X, Y, Z):- length(L), X = 2..L-2, height(H), Y = 2..H, depth(D), Z = 2..D-2.
-cell(X, Y, Z):- length(L), X=0..L, height(H), Y=0..H, depth(D), Z=0..D, not hollow(X, Y, Z).
+% cube
+cell(X, Y, Z):- length(L), X=0..L-1, height(H), Y=0..H-1, depth(D), Z=0..D-1.
 
 % symmetries of 3D pieces:
 % https://en.wikipedia.org/wiki/Octahedral_symmetry
@@ -13,8 +12,8 @@ cell(X, Y, Z):- length(L), X=0..L, height(H), Y=0..H, depth(D), Z=0..D, not holl
 % The other 24 matrices have a determinant of −1 and correspond to a reflection or inversion."
 
 % signed permutation matrices (6 permutations 2^3 = 8 sign combinations)
-perm(1, 2, 3,  1).  perm(2, 3, 1, 1).  perm(3, 1, 2,  1).  % even permutations (1 perm)
-perm(1, 3, 2, -1).  perm(2, 1, 3, -1).  perm(3, 2, 1, -1).  % odd permutations (2 perms)
+perm(1, 2, 3,  1).  perm(2, 3, 1, 1).  perm(3, 1, 2,  1).  % even permutations
+perm(1, 3, 2, -1).  perm(2, 1, 3, -1).  perm(3, 2, 1, -1).  % odd permutations
 sign(1 ; -1).
 
 % rotations (signed permutations with determinant = 1; signs must compensate permutation parity)
@@ -26,9 +25,9 @@ piece_coord(C) :- piece(_, _, _, C).
 
 % we translate the non-zero value position number thingy into its corresponding coordinate
 % e.g. perm(3, 1, 2, 1) -> NewX = Z, NewY = X, NewZ = Y
-coord_val(1, X, Y, Z, X) :- piece_coord(X), piece_coord(Y), piece_coord(Z).
-coord_val(2, X, Y, Z, Y) :- piece_coord(X), piece_coord(Y), piece_coord(Z).
-coord_val(3, X, Y, Z, Z) :- piece_coord(X), piece_coord(Y), piece_coord(Z).
+coord(1, X, Y, Z, X) :- piece_coord(X), piece_coord(Y), piece_coord(Z).
+coord(2, X, Y, Z, Y) :- piece_coord(X), piece_coord(Y), piece_coord(Z).
+coord(3, X, Y, Z, Z) :- piece_coord(X), piece_coord(Y), piece_coord(Z).
 
 % let's not use entire 6-tuples as Ids... Rotation Id = mixed radix encoding
 % P values in {1, 2, 3}
@@ -46,7 +45,8 @@ not_identical_rotations(P, R1, R2):- rotate(R1, X, Y, Z, P), rotate(R2, A, B, C,
 not_identical_rotations(P, R1, R2):- rotate(R2, X, Y, Z, P), rotate(R1, A, B, C, P), not rotate(R1, X, Y, Z, P).
 
 1 { anchor(Bid, Pid, R, X, Y, Z) : cell(X, Y, Z), rotate(R, 0, 0, 0, Pid) } 1:- Bid = 0..N-1, total_blocks(N).
-correct_picks(Pid, Times):- #count{ Bid : anchor(Bid, Pid, R, X, Y, Z) } = Times, pick_times(Pid, Times).
+% how many times a Bid with a given Pid has been picked
+correct_picks(Pid, Times):- Times = #count{ Bid : anchor(Bid, Pid, R, X, Y, Z), pick_times(Pid, Times) }, pick_times(Pid, Times).
 :- pick_times(Pid, Times), not correct_picks(Pid, Times). % we check the number of picks of a piece is correct
 :- anchor(Bid, Pid, R1, X, Y, Z), rotate(R2, A, B, C, Pid), not not_identical_rotations(Pid, R1, R2), R1 < R2. % lex leader
 
@@ -57,22 +57,23 @@ placed(X, Y, Z, Bid):- anchor(Bid, Pid, R, A1, B1, C1), rotate(R, A2, B2, C2, Pi
 
 :- placed(X, Y, Z, Bid), not cell(X, Y, Z). % cannot place outside valid coordinates
 covered(X, Y, Z):- placed(X, Y, Z, Bid). % a cell is covered if a piece is placed on it
-:- cell(X, Y, Z), not covered(X, Y, Z). % equivalence ^v :) this is just in case it makes computation faster
-
+% :- cell(X, Y, Z), not covered(X, Y, Z). % equivalence ^v :) this is just in case it makes computation faster
 :- placed(X, Y, Z, Bid1), placed(X, Y, Z, Bid2), Bid1 != Bid2. % cannot place two blocks in the same cell
 
 % cell, cell + 1 in some direction
-ortho_adjacent(X1, Y1, Z1, X2, Y2, Z2):- cell(X1, Y1, Z1), cell(X2, Y2, Z2), X1 = X2, Y1 = Y2, Z1 = Z2 + 1.
-ortho_adjacent(X1, Y1, Z1, X2, Y2, Z2):- cell(X1, Y1, Z1), cell(X2, Y2, Z2), X1 = X2, Y1 = Y2 + 1, Z1 = Z2.
-ortho_adjacent(X1, Y1, Z1, X2, Y2, Z2):- cell(X1, Y1, Z1), cell(X2, Y2, Z2), X1 = X2 + 1, Y1 = Y2, Z1 = Z2.
+ortho_adjacent(X, Y, Z1, X, Y, Z2):- cell(X, Y, Z1), cell(X, Y, Z2), Z1 = Z2 + 1.
+ortho_adjacent(X, Y1, Z, X, Y2, Z):- cell(X, Y1, Z), cell(X, Y2, Z), Y1 = Y2 + 1.
+ortho_adjacent(X1, Y, Z, X2, Y, Z):- cell(X1, Y, Z), cell(X2, Y, Z), X1 = X2 + 1.
 
-equal_size(Bid1, Bid2):- anchor(Bid1, Pid1, R1, X1, Y1, Z1), anchor(Bid2, Pid2, R2, X2, Y2, Z2), piece_size(Pid1, S), piece_size(Pid2, S).
+bid_to_pid(Bid, Pid):- anchor(Bid, Pid, R1, X1, Y1, Z1).
+
+equal_size(Bid1, Bid2):- bid_to_pid(Bid1, Pid1), bid_to_pid(Bid2, Pid2), piece_size(Pid1, S), piece_size(Pid2, S).
 
 % two blocks of equal size cannot be orthogonally adjacent
 :- placed(X1, Y1, Z1, Bid1), placed(X2, Y2, Z2, Bid2), ortho_adjacent(X1, Y1, Z1, X2, Y2, Z2), equal_size(Bid1, Bid2), Bid1 != Bid2.
 
 % lex-leader board symmetry breaking constraints (this is just what I did for homework 3)
-c_lex_idx(Id, X, Y, Z):- cell(X, Y, Z), length(L), height(H), Id = (Z * L * H) + (Y * L) + X + 1.
+c_lex_idx(Id, X, Y, Z):- cell(X, Y, Z), length(L-1), height(H-1), Id = (Z * L * H) + (Y * L) + X + 1.
 
 % board symmetries; Because we chose a pot as the 3D "board", there is actually only one symmetry
 % (horizontally, so the hole doesn't move), so I use a good ol' rotation matrix, it's just easier in this case.
@@ -94,6 +95,6 @@ seq_agrees(Sym, I) :- seq_agrees(Sym, I - 1), % sequence building
    c_lex_idx(I, X, Y, Z),
    sym_block(0, X, Y, Z, Bid1),
    sym_block(Sym, X, Y, Z, Bid2),
-   Bid1 > Bid2.
+   Bid1 < Bid2.
 
 #show placed/4.
