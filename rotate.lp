@@ -1,6 +1,5 @@
 % cup
-hollow(X, Y, Z):- length(L), X = 2..L-2, height(H), Y = 2..H, depth(D), Z = 2..D-2.
-cell(X, Y, Z):- length(L), X=0..L, height(H), Y=0..H, depth(D), Z=0..D..
+cell(X, Y, Z):- length(L), X=0..L, height(H), Y=0..H, depth(D), Z=0..D.
 
 % symmetries of 3D pieces:
 % https://en.wikipedia.org/wiki/Octahedral_symmetry

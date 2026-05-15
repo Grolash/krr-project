@@ -1,0 +1,16 @@
+% 64
+length(4). height(4). depth(4).
+%10 + 4 + 1 + 2 + 0 + 2 + 3 + 4 + 1 + 2 + 1 + 1
+total_blocks(4).
+
+%II4
+piece(5, 0, 0, 0). piece(5, 1, 0, 0). piece(5, 1, 0, 1). piece(5, 1, 1, 1).
+piece_size(5, 4).
+piece_score(5, 5).
+pick_times(5, 0).
+
+%cube8
+piece(3, 0, 0, 0). piece(3, 1, 0, 0). piece(3, 0, 1, 0). piece(3, 1, 1, 0). piece(3, 0, 0, 1). piece(3, 1, 0, 1). piece(3, 0, 1, 1). piece(3, 1, 1, 1).
+piece_size(3, 8).
+piece_score(3, 6).
+pick_times(3, 8).

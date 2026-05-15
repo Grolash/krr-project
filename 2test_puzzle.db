@@ -1,7 +1,7 @@
-% 80 
-length(4). height(4). depth(5).
+% 64
+length(4). height(4). depth(4).
 %10 + 4 + 1 + 2 + 0 + 2 + 3 + 4 + 1 + 2 + 1 + 1
-total_blocks(19).
+total_blocks(12).
 
 %piece(Id, X, Y, Z). the position of the block 
 %piece_size(Id, Size). The size of a piece
@@ -18,10 +18,46 @@ pick_times(0, 0).
 piece(1, 0, 0, 0). piece(1, 1, 0, 0). piece(1, 2, 0, 0). piece(1, 0, 0, 1).
 piece_size(1, 4).
 piece_score(1, 3).
-pick_times(1, 15).
+pick_times(1, 0).
 
-%LL5 (piramide incomplete)
+%LL5 (piramide incomplete 5)
 piece(2, 0, 0, 0). piece(2, 1, 0, 0). piece(2, 2, 0, 0). piece(2, 1, 1, 0). piece(2, 1, 0, 1).
 piece_size(2, 5).
 piece_score(2, 5).
-pick_times(2, 4).
+pick_times(2, 0).
+
+%cube8
+piece(3, 0, 0, 0). piece(3, 1, 0, 0). piece(3, 0, 1, 0). piece(3, 1, 1, 0). piece(3, 0, 0, 1). piece(3, 1, 0, 1). piece(3, 0, 1, 1). piece(3, 1, 1, 1).
+piece_size(3, 8).
+piece_score(3, 6).
+pick_times(3, 4).
+
+%LL4 (piramide incomplete 4)
+piece(4, 0, 0, 0). piece(4, 1, 0, 0). piece(4, 0, 1, 0). piece(4, 0, 0, 1).
+piece_size(4, 4).
+piece_score(4, 5).
+pick_times(4, 0).
+
+%II4
+piece(5, 0, 0, 0). piece(5, 1, 0, 0). piece(5, 1, 0, 1). piece(5, 1, 1, 1).
+piece_size(5, 4).
+piece_score(5, 5).
+pick_times(5, 8).
+
+%I2
+piece(6, 0, 0, 0). piece(6, 1, 0, 0).
+piece_size(6, 2).
+piece_score(6, 2).
+pick_times(6, 0).
+
+%cube7
+piece(8, 0, 0, 0). piece(8, 1, 0, 0). piece(8, 0, 1, 0). piece(8, 1, 1, 0). piece(8, 0, 0, 1). piece(8, 1, 0, 1). piece(8, 0, 1, 1).
+piece_size(8, 7).
+piece_score(8, 6).
+pick_times(8, 0).
+
+%point
+piece(9, 0, 0, 0).
+piece_size(9, 1).
+piece_score(9, 1).
+pick_times(9, 0).

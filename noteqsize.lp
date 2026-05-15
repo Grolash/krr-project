@@ -1,6 +1,5 @@
 % cup
-hollow(X, Y, Z):- length(L), X = 2..L-2, height(H), Y = 2..H, depth(D), Z = 2..D-2.
-cell(X, Y, Z):- length(L), X=0..L, height(H), Y=0..H, depth(D), Z=0..D..
+cell(X, Y, Z):- length(L), X=0..L, height(H), Y=0..H, depth(D), Z=0..D.
 
 % symmetries of 3D pieces:
 % https://en.wikipedia.org/wiki/Octahedral_symmetry
@@ -59,11 +58,6 @@ covered(X, Y, Z):- placed(X, Y, Z, Bid). % a cell is covered if a piece is place
 ortho_adjacent(X1, Y1, Z1, X2, Y2, Z2):- cell(X1, Y1, Z1), cell(X2, Y2, Z2), X1 = X2, Y1 = Y2, Z1 = Z2 + 1.
 ortho_adjacent(X1, Y1, Z1, X2, Y2, Z2):- cell(X1, Y1, Z1), cell(X2, Y2, Z2), X1 = X2, Y1 = Y2 + 1, Z1 = Z2.
 ortho_adjacent(X1, Y1, Z1, X2, Y2, Z2):- cell(X1, Y1, Z1), cell(X2, Y2, Z2), X1 = X2 + 1, Y1 = Y2, Z1 = Z2.
-
-equal_size(Bid1, Bid2):- anchor(Bid1, Pid1, R1, X1, Y1, Z1), anchor(Bid2, Pid2, R2, X2, Y2, Z2), piece_size(Pid1, S), piece_size(Pid2, S).
-
-% two blocks of equal size cannot be orthogonally adjacent
-:- placed(X1, Y1, Z1, Bid1), placed(X2, Y2, Z2, Bid2), ortho_adjacent(X1, Y1, Z1, X2, Y2, Z2), equal_size(Bid1, Bid2), Bid1 != Bid2.
 
 % lex-leader board symmetry breaking constraints (this is just what I did for homework 3)
 c_lex_idx(Id, X, Y, Z):- cell(X, Y, Z), length(L), height(H), Id = (Z * L * H) + (Y * L) + X + 1.
