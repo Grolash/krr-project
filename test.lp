@@ -61,16 +61,16 @@ covered(X, Y, Z):- placed(X, Y, Z, Bid). % a cell is covered if a piece is place
 :- placed(X, Y, Z, Bid1), placed(X, Y, Z, Bid2), Bid1 != Bid2. % cannot place two blocks in the same cell
 
 % cell, cell + 1 in some direction
-ortho_adjacent(X, Y, Z1, X, Y, Z2):- cell(X, Y, Z1), cell(X, Y, Z2), Z1 = Z2 + 1.
-ortho_adjacent(X, Y1, Z, X, Y2, Z):- cell(X, Y1, Z), cell(X, Y2, Z), Y1 = Y2 + 1.
-ortho_adjacent(X1, Y, Z, X2, Y, Z):- cell(X1, Y, Z), cell(X2, Y, Z), X1 = X2 + 1.
+% ortho_adjacent(X, Y, Z1, X, Y, Z2):- cell(X, Y, Z1), cell(X, Y, Z2), Z1 = Z2 + 1.
+% ortho_adjacent(X, Y1, Z, X, Y2, Z):- cell(X, Y1, Z), cell(X, Y2, Z), Y1 = Y2 + 1.
+% ortho_adjacent(X1, Y, Z, X2, Y, Z):- cell(X1, Y, Z), cell(X2, Y, Z), X1 = X2 + 1.
 
-bid_to_pid(Bid, Pid):- anchor(Bid, Pid, R1, X1, Y1, Z1).
+% bid_to_pid(Bid, Pid):- anchor(Bid, Pid, R1, X1, Y1, Z1).
 
-equal_size(Bid1, Bid2):- bid_to_pid(Bid1, Pid1), bid_to_pid(Bid2, Pid2), piece_size(Pid1, S), piece_size(Pid2, S).
+% equal_size(Bid1, Bid2):- bid_to_pid(Bid1, Pid1), bid_to_pid(Bid2, Pid2), piece_size(Pid1, S), piece_size(Pid2, S).
 
 % two blocks of equal size cannot be orthogonally adjacent
-:- placed(X1, Y1, Z1, Bid1), placed(X2, Y2, Z2, Bid2), ortho_adjacent(X1, Y1, Z1, X2, Y2, Z2), equal_size(Bid1, Bid2), Bid1 != Bid2.
+% :- placed(X1, Y1, Z1, Bid1), placed(X2, Y2, Z2, Bid2), ortho_adjacent(X1, Y1, Z1, X2, Y2, Z2), equal_size(Bid1, Bid2), Bid1 != Bid2.
 
 % lex-leader board symmetry breaking constraints (this is just what I did for homework 3)
 c_lex_idx(Id, X, Y, Z):- cell(X, Y, Z), length(L-1), height(H-1), Id = (Z * L * H) + (Y * L) + X + 1.
