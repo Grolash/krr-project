@@ -1,0 +1,15 @@
+% 6x6x3 = 108 total_blocks - 8 blocks centraux = 104 blocks
+length(4). height(4). depth(3).
+%10 + 4 + 1 + 2 + 0 + 2 + 3 + 4 + 1 + 2 + 1 + 1
+total_blocks(12).
+
+%piece(Id, X, Y, Z). the position of the block
+%piece_size(Id, Size). The size of a piece
+%piece_score(Id, Score). The score of a piece
+%pick_times(Id, Number). The number of allowed pieces
+
+%L3
+piece(0, 0, 0, 0). piece(0, 0, 1, 0). piece(0, 0, 2, 0).
+piece_size(0, 3).
+piece_score(0, 3).
+pick_times(0, 12).

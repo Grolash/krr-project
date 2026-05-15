@@ -20,9 +20,15 @@ sign(1 ; -1).
 % rotations (signed permutations with determinant = 1; signs must compensate permutation parity)
 rot(P1, S1, P2, S2, P3, S3):- perm(P1, P2, P3, SP), sign(S1), sign(S2), sign(S3), S1 * S2 * S3 * SP = 1.
 
+piece_coord(C) :- piece(_, C, _, _).
+piece_coord(C) :- piece(_, _, C, _).
+piece_coord(C) :- piece(_, _, _, C).
+
 % we translate the non-zero value position number thingy into its corresponding coordinate
 % e.g. perm(3, 1, 2, 1) -> NewX = Z, NewY = X, NewZ = Y
-coord(1, X, Y, Z, X):- cell(X, Y, Z). coord(2, X, Y, Z, Y):- cell(X, Y, Z). coord(3, X, Y, Z, Z):- cell(X, Y, Z).
+coord_val(1, X, Y, Z, X) :- piece_coord(X), piece_coord(Y), piece_coord(Z).
+coord_val(2, X, Y, Z, Y) :- piece_coord(X), piece_coord(Y), piece_coord(Z).
+coord_val(3, X, Y, Z, Z) :- piece_coord(X), piece_coord(Y), piece_coord(Z).
 
 % let's not use entire 6-tuples as Ids... Rotation Id = mixed radix encoding
 % P values in {1, 2, 3}
@@ -39,7 +45,7 @@ rotate(R, NewX, NewY, NewZ, Id):- piece(Id, X, Y, Z), rot(P1, S1, P2, S2, P3, S3
 not_identical_rotations(P, R1, R2):- rotate(R1, X, Y, Z, P), rotate(R2, A, B, C, P), not rotate(R2, X, Y, Z, P).
 not_identical_rotations(P, R1, R2):- rotate(R2, X, Y, Z, P), rotate(R1, A, B, C, P), not rotate(R1, X, Y, Z, P).
 
-1 { anchor(Bid, Pid, R, X, Y, Z) : cell(X, Y, Z), rotate(R, 0, 0, 0, Pid) } 1:- Bid = 0..N, total_blocks(N).
+1 { anchor(Bid, Pid, R, X, Y, Z) : cell(X, Y, Z), rotate(R, 0, 0, 0, Pid) } 1:- Bid = 0..N-1, total_blocks(N).
 correct_picks(Pid, Times):- #count{ Bid : anchor(Bid, Pid, R, X, Y, Z) } = Times, pick_times(Pid, Times).
 :- pick_times(Pid, Times), not correct_picks(Pid, Times). % we check the number of picks of a piece is correct
 :- anchor(Bid, Pid, R1, X, Y, Z), rotate(R2, A, B, C, Pid), not not_identical_rotations(Pid, R1, R2), R1 < R2. % lex leader
