@@ -1,5 +1,5 @@
 % 5x5x3 = 75 total_blocks - 1 cube central = 74 blocks
-length(5). height(5). depth(3).
+length(5). height(3). depth(5).
 % 4 + 8 + 5
 total_blocks(17).
 
@@ -36,6 +36,6 @@ pick_times(3, 0).
 
 %I2
 piece(4, 0, 0, 0). piece(4, 1, 0, 0).
-piece_size(3, 2).
-piece_score(3, 2).
-pick_times(3, 5).
+piece_size(4, 2).
+piece_score(4, 2).
+pick_times(4, 5).
