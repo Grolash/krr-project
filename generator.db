@@ -1,41 +1,34 @@
 % 5x5x3 = 75 total cells - 1 cube central = 74 cells
 length(5). height(3). depth(5).
-% 4 + 8 + 5
-total_blocks(17).
-
-%piece(Id, X, Y, Z). the position of the block
-%piece_size(Id, Size). The size of a piece
-%piece_score(Id, Score). The score of a piece
-%pick_times(Id, Number). The number of allowed pieces
 
 %O6
 piece(0, 0, 0, 0). piece(0, 0, 1, 0). piece(0, 0, 2, 0). piece(0, 1, 0, 0). piece(0, 1, 1, 0). piece(0, 1, 2, 0).
 piece_size(0, 6).
 piece_score(0, 6).
-pick_times(0, 0).
+% pick_times(0, 0).
 
 %Cube8
 piece(1, 0, 0, 0). piece(1, 1, 0, 0). piece(1, 0, 1, 0). piece(1, 1, 1, 0).
 piece(1, 0, 0, 1). piece(1, 1, 0, 1). piece(1, 0, 1, 1). piece(1, 1, 1, 1).
 piece_size(1, 8).
 piece_score(1, 8).
-pick_times(1, 4).
+% pick_times(1, 4).
 
 %O4
 piece(2, 0, 0, 0). piece(2, 1, 0, 0). piece(2, 0, 1, 0). piece(2, 1, 1, 0).
 piece_size(2, 4).
 piece_score(2, 4).
-pick_times(2, 8).
+% pick_times(2, 8).
 
 %O9
 piece(3, 0, 0, 0). piece(3, 1, 0, 0). piece(3, 2, 0, 0). piece(3, 0, 1, 0). piece(3, 1, 1, 0). piece(3, 2, 1, 0).
 piece(3, 0, 2, 0). piece(3, 1, 2, 0). piece(3, 2, 2, 0).
 piece_size(3, 9).
 piece_score(3, 9).
-pick_times(3, 0).
+% pick_times(3, 0).
 
 %I2
 piece(4, 0, 0, 0). piece(4, 1, 0, 0).
 piece_size(4, 2).
 piece_score(4, 2).
-pick_times(4, 5).
+% pick_times(4, 5).

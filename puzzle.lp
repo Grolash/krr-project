@@ -1,5 +1,7 @@
-% cube
-cell(X, Y, Z):- length(L), X=0..L-1, height(H), Y=0..H-1, depth(D), Z=0..D-1.
+% pot
+hollow(X, Y, Z):- length(L), X=2..L-3, height(H), Y=2..H-1, depth(D), Z=2..D-3.
+cell(X, Y, Z):- length(L), X=0..L-1, height(H), Y=0..H-1, depth(D), Z=0..D-1, not hollow(X, Y, Z).
+
 
 % symmetries of 3D pieces:
 % https://en.wikipedia.org/wiki/Octahedral_symmetry
@@ -46,7 +48,7 @@ not_identical_rotations(P, R1, R2):- rotate(R2, X, Y, Z, P), rotate(R1, A, B, C,
 
 1 { anchor(Bid, Pid, R, X, Y, Z) : cell(X, Y, Z), rotate(R, 0, 0, 0, Pid) } 1:- Bid = 0..N-1, total_blocks(N).
 % how many times a Bid with a given Pid has been picked
-correct_picks(Pid, Times):- Times = #count{ Bid : anchor(Bid, Pid, R, X, Y, Z), pick_times(Pid, Times) }, pick_times(Pid, Times).
+correct_picks(Pid, Times):- Times = #count{ Bid : anchor(Bid, Pid, R, X, Y, Z)}, pick_times(Pid, Times).
 :- pick_times(Pid, Times), not correct_picks(Pid, Times). % we check the number of picks of a piece is correct
 :- anchor(Bid, Pid, R1, X, Y, Z), rotate(R2, A, B, C, Pid), not not_identical_rotations(Pid, R1, R2), R1 < R2. % lex leader
 
