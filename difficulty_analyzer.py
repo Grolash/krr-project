@@ -18,7 +18,7 @@ NORM_MAX = {
     "grid_volume":   180,
     "active_types":   20,
     "total_blocks":   50,
-    "solve_time_ms": 7500,
+    "solve_time_ms": 60000,
 }
 
 # poids de chaque critere, doit sommer a 1.0
@@ -53,6 +53,7 @@ class Instance:
     height: int
     depth: int
     pieces: List[Piece]
+    total_blocks: int
     db_path: str
 
 
@@ -86,6 +87,7 @@ def parse_db(path: str) -> Instance:
     length = get_int(r'\blength\((\d+)\)')
     height = get_int(r'\bheight\((\d+)\)')
     depth  = get_int(r'\bdepth\((\d+)\)')
+    total_blocks = get_int(r'\btotal_blocks\((\d+)\)')
 
     cells_by_pid: Dict[int, list] = {}
     for m in re.finditer(r'\bpiece\((\d+),\s*(-?\d+),\s*(-?\d+),\s*(-?\d+)\)', content):
@@ -110,7 +112,7 @@ def parse_db(path: str) -> Instance:
     ]
 
     return Instance(length=length, height=height, depth=depth,
-                    pieces=pieces, db_path=path)
+                    pieces=pieces, total_blocks=total_blocks, db_path=path)
 
 
 def find_clingo() -> Optional[str]:
@@ -203,7 +205,7 @@ def analyze(lp_path: str, db_path: str, timeout: float = 60.0, name: str = "") -
 
         grid_volume   = inst.length * inst.height * inst.depth,
         active_types  = active,
-        total_blocks  = clingo["distinct_bids"],
+        total_blocks  = inst.total_blocks,
         solve_time_ms = clingo["solve_time_ms"],
 
         satisfiable  = clingo["satisfiable"],
