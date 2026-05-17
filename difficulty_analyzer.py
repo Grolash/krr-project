@@ -53,7 +53,6 @@ class Instance:
     height: int
     depth: int
     pieces: List[Piece]
-    total_blocks: int
     db_path: str
 
 
@@ -64,7 +63,7 @@ class PuzzleMetrics:
 
     grid_volume: int = 0
     active_types: int = 0
-    total_blocks: int = 0
+    total_blocks: int = 0   # nb de anchor() dans la solution
     solve_time_ms: float = 0.0
 
     satisfiable: bool = True
@@ -87,7 +86,6 @@ def parse_db(path: str) -> Instance:
     length = get_int(r'\blength\((\d+)\)')
     height = get_int(r'\bheight\((\d+)\)')
     depth  = get_int(r'\bdepth\((\d+)\)')
-    total  = get_int(r'\btotal_blocks\((\d+)\)')
 
     cells_by_pid: Dict[int, list] = {}
     for m in re.finditer(r'\bpiece\((\d+),\s*(-?\d+),\s*(-?\d+),\s*(-?\d+)\)', content):
@@ -112,7 +110,7 @@ def parse_db(path: str) -> Instance:
     ]
 
     return Instance(length=length, height=height, depth=depth,
-                    pieces=pieces, total_blocks=total, db_path=path)
+                    pieces=pieces, db_path=path)
 
 
 def find_clingo() -> Optional[str]:
@@ -126,7 +124,7 @@ def find_clingo() -> Optional[str]:
 
 
 def run_clingo(lp_path: str, db_path: str, timeout: float = 60.0) -> dict:
-    res = dict(solve_time_ms=0.0, satisfiable=True, models_found=0, timed_out=False)
+    res = dict(solve_time_ms=0.0, distinct_bids=0, satisfiable=True, models_found=0, timed_out=False)
 
     clingo = find_clingo()
     if clingo is None:
@@ -139,6 +137,12 @@ def run_clingo(lp_path: str, db_path: str, timeout: float = 60.0) -> dict:
         proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout + 5)
         res["solve_time_ms"] = (time.perf_counter() - t0) * 1000
         out = proc.stdout + proc.stderr
+
+        # on cherche uniquement dans la ligne du modele (apres "Answer:")
+        answer_match = re.search(r'Answer\s*:\s*\d+[^\n]*\n(.*)', out)
+        answer_line = answer_match.group(1) if answer_match else out
+        bids = set(re.findall(r'\bplaced\(\d+,\s*\d+,\s*\d+,\s*(\d+)\s*\)', answer_line))
+        res["distinct_bids"] = len(bids)
 
         m = re.search(r'Models\s*:\s*(\d+)', out, re.IGNORECASE)
         if m:
@@ -162,8 +166,9 @@ def _fake_run(lp_path: str, db_path: str, res: dict) -> dict:
     import random
     size = sum(os.path.getsize(p) for p in (lp_path, db_path) if os.path.exists(p))
     scale = max(1.0, size / 1500)
-    res["solve_time_ms"] = round(scale ** 1.5 * 200 * (0.8 + random.random() * 0.4), 1)
-    res["models_found"] = 1
+    res["solve_time_ms"]  = round(scale ** 1.5 * 200 * (0.8 + random.random() * 0.4), 1)
+    res["distinct_bids"]  = int(scale * 4 * (0.8 + random.random() * 0.4))
+    res["models_found"]   = 1
     return res
 
 
@@ -198,7 +203,7 @@ def analyze(lp_path: str, db_path: str, timeout: float = 60.0, name: str = "") -
 
         grid_volume   = inst.length * inst.height * inst.depth,
         active_types  = active,
-        total_blocks  = inst.total_blocks,
+        total_blocks  = clingo["distinct_bids"],
         solve_time_ms = clingo["solve_time_ms"],
 
         satisfiable  = clingo["satisfiable"],
