@@ -1,5 +1,5 @@
 % 5x5x3 = 75 total cells - 1 cube central = 74 cells
-length(5). height(3). depth(5).
+length(5). height(5). depth(3).
 
 %O6
 piece(0, 0, 0, 0). piece(0, 0, 1, 0). piece(0, 0, 2, 0). piece(0, 1, 0, 0). piece(0, 1, 1, 0). piece(0, 1, 2, 0).

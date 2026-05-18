@@ -1,4 +1,0 @@
-length(3). height(3). depth(3).
-
-piece(0, 0, 0, 0). piece(0, 0, 1, 0). piece(0, 0, 2, 0).
-piece_size(0, 3). piece_score(0, 3). pick_times(0, 9).
